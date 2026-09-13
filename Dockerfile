@@ -1,5 +1,16 @@
-FROM eclipse-temurin:24-jdk
+FROM eclipse-temurin:24-jdk AS build
 
-ADD target/OfflineUPI-Mesh-0.0.1-SNAPSHOT.jar OfflineUPI-Mesh-0.0.1-SNAPSHOT.jar
+WORKDIR /app
 
-ENTRYPOINT ["java", "-jar", "/OfflineUPI-Mesh-0.0.1-SNAPSHOT.jar"]
+COPY . .
+
+RUN chmod +x mvnw
+RUN ./mvnw -DskipTests package
+
+FROM eclipse-temurin:24-jre
+
+WORKDIR /app
+
+COPY --from=build /app/target/OfflineUPI-Mesh-0.0.1-SNAPSHOT.jar app.jar
+
+ENTRYPOINT ["java", "-jar", "app.jar"]
